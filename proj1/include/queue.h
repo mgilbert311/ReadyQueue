@@ -12,20 +12,27 @@
 #define	EMPTY	(-1)		/* null value for qnext or qprev index	*/
 
 
-//TODO - define queue's data members
+//define queue's data members
 struct queue
 {
-	// TODO - pointer to head qentry
-	// TODO - pointer to tail qentry
-	// TODO - size of queue
+	//pointer to head qentry
+	struct qentry *head;
+	//pointer to tail qentry
+	struct qentry *tail;
+	//size of queue
+	int32 size;
 };
 
 
-//TODO - define a queue entry's data members
+//define a queue entry's data members
 struct qentry
 {
-	// TODO - process ID
-	// TODO - other members
+	// process ID
+	pid32 pid;
+	// Pointers to next and previous queue entries
+	struct qentry *next;
+	struct qentry *prev;
+	
 };
 
 

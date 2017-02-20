@@ -10,7 +10,12 @@
 void	printqueue(struct queue *q)
 {
 	//TODO - print all contents from head to tail
-
+	int i;
+	kprintf("[");
+	for(i=0; i < q->size; i++){
+		kprintf("(pid=%d), ", q[i]);
+	}
+	kprintf("]");
 	//TODO - format should be [(pid=p1), (pid=p2), ...]
 }
 
@@ -22,6 +27,11 @@ void	printqueue(struct queue *q)
 bool8	isempty(struct queue *q)
 {
 	//TODO
+	if(q->head != Null){
+		return TRUE;
+	}else{
+		return FALSE;
+	}
 }
 
 /**
@@ -32,6 +42,11 @@ bool8	isempty(struct queue *q)
 bool8	nonempty(struct queue *q)
 {
 	//TODO - don't just check q's size because q could be NULL
+	if(q->head != NULL){
+		return TRUE;
+	}
+	return FALSE;
+	
 }
 
 
@@ -43,6 +58,10 @@ bool8	nonempty(struct queue *q)
 bool8	isfull(struct queue *q)
 {
 	//TODO - check if there are at least NPROC processes in the queue
+	if(q->size == NPROC){
+		return TRUE;
+	}
+	return FALSE;
 }
 
 
@@ -55,15 +74,32 @@ bool8	isfull(struct queue *q)
  */
 pid32 enqueue(pid32 pid, struct queue *q)
 {
-        //TODO - check if queue is full and if pid is illegal, and return SYSERR if either is true
-
+        //check if queue is full and if pid is illegal, and return SYSERR if either is true
+		if(isfull(q) || isbadpid(pid)){
+			return SYSERR;
+		}
         //TODO - allocate space on heap for a new QEntry
+		struct qentry *newEntry;
+		newEntry = (struct qentry*)malloc(sizeof(struct qentry));
+		//initialize the new QEntry
+		newEntry->pid = pid;
+		newEntry->prev = q->tail;
+		newEntry->next = NULL;
+		//insert into tail of queue
+		//If the queue is empty, insert as the head
+		if(isempty(q)){
+			q->head = newEntry;
+			q->tail = newEntry;
+		}else{
+			//Can i do this?
+			//Set the pointer of the tail to the new entry
+			q->tail->next = newEntry;
+			//The new tail is the entry we added
+			q->tail = newEntry;
+		}
 
-        //TODO - initialize the new QEntry
-
-        //TODO - insert into tail of queue
-
-        //TODO - return the pid on success
+        //return the pid on success
+        return pid;
 }
 
 
@@ -74,15 +110,22 @@ pid32 enqueue(pid32 pid, struct queue *q)
  */
 pid32 dequeue(struct queue *q)
 {
-        //TODO - return EMPTY if queue is empty
+        //return EMPTY if queue is empty
+		if(isempty(q)){
+			return EMPTY;
+		}
+		
+		//get the head entry of the queue
+		struct qentry *temp;
+		temp = q->head;
+		pid32 tempPID = temp->pid;
+		//unlink the head entry from the rest
+		q->head = q->head->next;
+		//free up the space on the heap
+		free(temp, sizeof(temp));
 
-        //TODO - get the head entry of the queue
-
-        //TODO - unlink the head entry from the rest
-
-        //TODO - free up the space on the heap
-
-        //TODO - return the pid on success
+        //return the pid on success
+        return tempPID;
 }
 
 
@@ -94,11 +137,24 @@ pid32 dequeue(struct queue *q)
  */
 struct qentry *getbypid(pid32 pid, struct queue *q)
 {
-	//TODO - return NULL if queue is empty or if an illegal pid is given
+	//return NULL if queue is empty or if an illegal pid is given
+	if(isempty(q) || isbadpid(pid)){
+		return NULL;
+	}
+	struct qentry *temp;
+	temp = q->head;
+	//find the qentry with the given pid, loop through the size of the queue
+	int i;
+	for(i=0; i < q->size; i++){
+		if(temp->pid == pid){
+			//return a pointer to it
+			return temp->pid;
+		}
+		temp = temp->next;
+	}
+	//If not found
+	return NULL;
 
-	//TODO - find the qentry with the given pid
-
-	//TODO - return a pointer to it
 }
 
 /**
@@ -108,9 +164,15 @@ struct qentry *getbypid(pid32 pid, struct queue *q)
  */
 pid32	getfirst(struct queue *q)
 {
-	//TODO - return EMPTY if queue is empty
-
-	//TODO - remove process from head of queue and return its pid
+	//return EMPTY if queue is empty
+	if(isempty(q)){
+		return EMPTY;
+	}
+	//pid32 tempPID;
+	//tempPID = dequeue(q);
+	
+	//remove process from head of queue and return its pid
+	return dequeue(q);
 }
 
 /**
@@ -120,9 +182,14 @@ pid32	getfirst(struct queue *q)
  */
 pid32	getlast(struct queue *q)
 {
-	//TODO - return EMPTY if queue is empty
-
-	//TODO - remove process from tail of queue and return its pid
+	//return EMPTY if queue is empty
+	if(isempty(q)){
+		return EMPTY;
+	}
+	
+	//remove process from tail of queue and return its pid
+	return dequeue(q->tail);
+	
 }
 
 
@@ -135,11 +202,22 @@ pid32	getlast(struct queue *q)
  */
 pid32	remove(pid32 pid, struct queue *q)
 {
-	//TODO - return EMPTY if queue is empty
+	//return EMPTY if queue is empty
+	if(isempty(q)){
+		return EMPTY;
+	}
+	//return SYSERR if pid is illegal
+	if(isbadpid(pid)){
+		return SYSERR;
+	}
+	
+	int i;
+	//Maybe should be <NPROC?
+	for(i=0; i<q->size; i++){
+		if(
+	}
 
-	//TODO - return SYSERR if pid is illegal
-
-	//TODO - remove process identified by pid parameter from the queue and return its pid
+	//remove process identified by pid parameter from the queue and return its pid
 
 	//TODO - if pid does not exist in the queue, return SYSERR
 }
