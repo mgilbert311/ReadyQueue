@@ -9,14 +9,14 @@
  */
 void	printqueue(struct queue *q)
 {
-	//TODO - print all contents from head to tail
+	//print all contents from head to tail
 	int i;
 	kprintf("[");
 	for(i=0; i < q->size; i++){
 		kprintf("(pid=%d), ", q[i]);
 	}
 	kprintf("]");
-	//TODO - format should be [(pid=p1), (pid=p2), ...]
+	//format should be [(pid=p1), (pid=p2), ...]
 }
 
 /**
@@ -26,12 +26,14 @@ void	printqueue(struct queue *q)
  */
 bool8	isempty(struct queue *q)
 {
-	//TODO
-	if(q->head != Null){
+	//Check if empty
+	if(q->head != NULL){
 		return TRUE;
-	}else{
-		return FALSE;
 	}
+	
+	return FALSE;
+	
+	
 }
 
 /**
@@ -41,7 +43,7 @@ bool8	isempty(struct queue *q)
  */
 bool8	nonempty(struct queue *q)
 {
-	//TODO - don't just check q's size because q could be NULL
+	//don't just check q's size because q could be NULL
 	if(q->head != NULL){
 		return TRUE;
 	}
@@ -57,8 +59,8 @@ bool8	nonempty(struct queue *q)
  */
 bool8	isfull(struct queue *q)
 {
-	//TODO - check if there are at least NPROC processes in the queue
-	if(q->size == NPROC){
+	// check if there are at least NPROC processes in the queue
+	if(q->size >= NPROC){
 		return TRUE;
 	}
 	return FALSE;
@@ -78,7 +80,7 @@ pid32 enqueue(pid32 pid, struct queue *q)
 		if(isfull(q) || isbadpid(pid)){
 			return SYSERR;
 		}
-        //TODO - allocate space on heap for a new QEntry
+        //allocate space on heap for a new QEntry
 		struct qentry *newEntry;
 		newEntry = (struct qentry*)malloc(sizeof(struct qentry));
 		//initialize the new QEntry
@@ -122,7 +124,7 @@ pid32 dequeue(struct queue *q)
 		//unlink the head entry from the rest
 		q->head = q->head->next;
 		//free up the space on the heap
-		free(temp, sizeof(temp));
+		free(*temp, sizeof(temp));
 
         //return the pid on success
         return tempPID;
@@ -210,13 +212,23 @@ pid32	remove(pid32 pid, struct queue *q)
 	if(isbadpid(pid)){
 		return SYSERR;
 	}
-	
-	int i;
-	//Maybe should be <NPROC?
-	for(i=0; i<q->size; i++){
-		if(
+	struct qentry temp = q.head;
+	pid32 returnedPid;
+	while(temp != NULL){
+		//Loop through the processes
+		if(temp.pid == pid){
+			//Fix the pointers and then remove
+			temp.prev->next = temp.next;
+			temp.next->prev = temp.prev;
+			returnedPid = temp.pid;
+			free(&temp, sizeof(temp));
+			return returnedPid;
+		}
+		temp = temp.next;
 	}
+	
 
+	return SYSERR;
 	//remove process identified by pid parameter from the queue and return its pid
 
 	//TODO - if pid does not exist in the queue, return SYSERR
